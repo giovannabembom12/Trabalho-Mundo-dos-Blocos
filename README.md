@@ -8,6 +8,7 @@ Este repositório contém o projeto **"Mundo dos Blocos Variável em Model Check
 
 | Nome | E-mail |
 |------|---------|
+| Anna Luisa Antony Afonso | anna.antony@icomp.ufam.edu.br |
 | Elaine de Castro Freire | elaine.freire@icomp.ufam.edu.br |
 | Giovanna Bembom da Silva Bandeira | giovanna.bembom@icomp.ufam.edu.br |
 | Luiggy Augusto Lima Alves | luiggy.alves@icomp.ufam.edu.br |
