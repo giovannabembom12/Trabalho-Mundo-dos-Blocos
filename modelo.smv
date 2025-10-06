@@ -1,0 +1,137 @@
+-- ======== MODELO BASE ========
+
+MODULE main
+VAR
+    pos_a : { table0, table1, table2, table3, table4, table5, table6, on_b, on_c, on_d };
+    pos_b : { table0, table1, table2, table3, table4, table5, table6, on_a, on_c, on_d };
+    pos_c : { table0, table1, table2, table3, table4, table5, table6, on_a, on_b, on_d };
+    -- Bloco d (tamanho 3) só pode estar na mesa (table0..table5) pois ocupa 2 slots
+    pos_d : { table0, table1, table2, table3, table4, table5 };
+
+    move : { move_a_table2, move_a_table3, move_a_table4, move_a_table5, move_a_table6,
+             move_a_on_b, move_a_on_c, move_a_on_d,
+             move_b_table2, move_b_table3, move_b_table4, move_b_table5, move_b_table6,
+             move_b_on_a, move_b_on_c, move_b_on_d,
+             move_c_table2, move_c_table3, move_c_table4, move_c_table5, move_c_table6,
+             move_c_on_a, move_c_on_b, move_c_on_d,
+             move_d_table0, move_d_table1, move_d_table2, move_d_table3, move_d_table4, move_d_table5,
+             none };
+
+DEFINE
+    size_a := 1;
+    size_b := 1;
+    size_c := 2;
+    size_d := 3;
+
+    clear_a := (pos_b != on_a) & (pos_c != on_a);
+    clear_b := (pos_a != on_b) & (pos_c != on_b);
+    clear_c := (pos_a != on_c) & (pos_b != on_c);
+    clear_d := (pos_a != on_d) & (pos_b != on_d) & (pos_c != on_d);
+
+    free_table0 := (pos_a != table0) & (pos_b != table0) & (pos_c != table0) & (pos_d != table0) & (pos_d != table1);
+    free_table1 := (pos_a != table1) & (pos_b != table1) & (pos_c != table1) & (pos_d != table0) & (pos_d != table1) & (pos_d != table2);
+    free_table2 := (pos_a != table2) & (pos_b != table2) & (pos_c != table2) & (pos_d != table1) & (pos_d != table2) & (pos_d != table3);
+    free_table3 := (pos_a != table3) & (pos_b != table3) & (pos_c != table3) & (pos_d != table2) & (pos_d != table3) & (pos_d != table4);
+    free_table4 := (pos_a != table4) & (pos_b != table4) & (pos_c != table4) & (pos_d != table3) & (pos_d != table4) & (pos_d != table5);
+    free_table5 := (pos_a != table5) & (pos_b != table5) & (pos_c != table5) & (pos_d != table4) & (pos_d != table5);
+    free_table6 := (pos_a != table6) & (pos_b != table6) & (pos_c != table6);
+
+    goal := (pos_a = on_c) & (pos_b = on_a) & (pos_c = on_d);
+
+ASSIGN
+    init(pos_a) := on_b;
+    init(pos_b) := on_d;
+    init(pos_c) := on_a;
+    init(pos_d) := table0;
+
+    next(pos_a) :=
+        case
+            move = move_a_table2 : table2;
+            move = move_a_table3 : table3;
+            move = move_a_table4 : table4;
+            move = move_a_table5 : table5;
+            move = move_a_table6 : table6;
+            move = move_a_on_b : on_b;
+            move = move_a_on_c : on_c;
+            move = move_a_on_d : on_d;
+            TRUE : pos_a;
+        esac;
+
+    next(pos_b) :=
+        case
+            move = move_b_table2 : table2;
+            move = move_b_table3 : table3;
+            move = move_b_table4 : table4;
+            move = move_b_table5 : table5;
+            move = move_b_table6 : table6;
+            move = move_b_on_a : on_a;
+            move = move_b_on_c : on_c;
+            move = move_b_on_d : on_d;
+            TRUE : pos_b;
+        esac;
+
+    next(pos_c) :=
+        case
+            move = move_c_table2 : table2;
+            move = move_c_table3 : table3;
+            move = move_c_table4 : table4;
+            move = move_c_table5 : table5;
+            move = move_c_table6 : table6;
+            move = move_c_on_a : on_a;
+            move = move_c_on_b : on_b;
+            move = move_c_on_d : on_d;
+            TRUE : pos_c;
+        esac;
+
+    next(pos_d) :=
+        case
+            move = move_d_table0 : table0;
+            move = move_d_table1 : table1;
+            move = move_d_table2 : table2;
+            move = move_d_table3 : table3;
+            move = move_d_table4 : table4;
+            move = move_d_table5 : table5;
+            TRUE : pos_d;
+        esac;
+
+    TRANS
+        (move = move_a_table2 -> clear_a & free_table2) &
+        (move = move_a_table3 -> clear_a & free_table3) &
+        (move = move_a_table4 -> clear_a & free_table4) &
+        (move = move_a_table5 -> clear_a & free_table5) &
+        (move = move_a_table6 -> clear_a & free_table6) &
+        (move = move_a_on_b -> clear_a & clear_b & size_a <= size_b) &
+        (move = move_a_on_c -> clear_a & clear_c & size_a <= size_c) &
+        (move = move_a_on_d -> clear_a & clear_d & size_a <= size_d) &
+
+        (move = move_b_table2 -> clear_b & free_table2) &
+        (move = move_b_table3 -> clear_b & free_table3) &
+        (move = move_b_table4 -> clear_b & free_table4) &
+        (move = move_b_table5 -> clear_b & free_table5) &
+        (move = move_b_table6 -> clear_b & free_table6) &
+        (move = move_b_on_a -> clear_b & clear_a & size_b <= size_a) &
+        (move = move_b_on_c -> clear_b & clear_c & size_b <= size_c) &
+        (move = move_b_on_d -> clear_b & clear_d & size_b <= size_d) &
+
+        (move = move_c_table2 -> clear_c & free_table2) &
+        (move = move_c_table3 -> clear_c & free_table3) &
+        (move = move_c_table4 -> clear_c & free_table4) &
+        (move = move_c_table5 -> clear_c & free_table5) &
+        (move = move_c_table6 -> clear_c & free_table6) &
+        (move = move_c_on_a -> clear_c & clear_a & size_c <= size_a) &
+        (move = move_c_on_b -> clear_c & clear_b & size_c <= size_b) &
+        (move = move_c_on_d -> clear_c & clear_d & size_c <= size_d) &
+
+        (move = move_d_table0 -> clear_d & free_table0 & free_table1) &
+        (move = move_d_table1 -> clear_d & free_table1 & free_table2) &
+        (move = move_d_table2 -> clear_d & free_table2 & free_table3) &
+        (move = move_d_table3 -> clear_d & free_table3 & free_table4) &
+        (move = move_d_table4 -> clear_d & free_table4 & free_table5) &
+        (move = move_d_table5 -> clear_d & free_table5 & free_table6) &
+
+        (move != none -> 
+            (next(pos_a) != pos_a | next(pos_b) != pos_b | 
+             next(pos_c) != pos_c | next(pos_d) != pos_d));
+
+-- Especificação: verificar se o goal é alcançável
+CTLSPEC !(EF goal);

@@ -1,0 +1,125 @@
+
+-- ======== SITUAÇÃO 3 ========
+
+MODULE main
+
+DEFINE
+    size_a := 1;
+    size_b := 1;
+    size_c := 2;
+    size_d := 3; 
+
+    is_b_on_a := (pos_b_y = pos_a_y + 1) & !(pos_b_x >= pos_a_x + size_a | pos_b_x + size_b <= pos_a_x);
+    is_c_on_a := (pos_c_y = pos_a_y + 1) & !(pos_c_x >= pos_a_x + size_a | pos_c_x + size_c <= pos_a_x);
+    is_d_on_a := (pos_d_y = pos_a_y + 1) & !(pos_d_x >= pos_a_x + size_a | pos_d_x + size_d <= pos_a_x);
+
+    is_a_on_b := (pos_a_y = pos_b_y + 1) & !(pos_a_x >= pos_b_x + size_b | pos_a_x + size_a <= pos_b_x);
+    is_c_on_b := (pos_c_y = pos_b_y + 1) & !(pos_c_x >= pos_b_x + size_b | pos_c_x + size_c <= pos_b_x);
+    is_d_on_b := (pos_d_y = pos_b_y + 1) & !(pos_d_x >= pos_b_x + size_b | pos_d_x + size_d <= pos_b_x);
+
+    is_a_on_c := (pos_a_y = pos_c_y + 1) & !(pos_a_x >= pos_c_x + size_c | pos_a_x + size_a <= pos_c_x);
+    is_b_on_c := (pos_b_y = pos_c_y + 1) & !(pos_b_x >= pos_c_x + size_c | pos_b_x + size_b <= pos_c_x);
+    is_d_on_c := (pos_d_y = pos_c_y + 1) & !(pos_d_x >= pos_c_x + size_c | pos_d_x + size_d <= pos_c_x);
+
+    is_a_on_d := (pos_a_y = pos_d_y + 1) & !(pos_a_x >= pos_d_x + size_d | pos_a_x + size_a <= pos_d_x);
+    is_b_on_d := (pos_b_y = pos_d_y + 1) & !(pos_b_x >= pos_d_x + size_d | pos_b_x + size_b <= pos_d_x);
+    is_c_on_d := (pos_c_y = pos_d_y + 1) & !(pos_c_x >= pos_d_x + size_d | pos_c_x + size_c <= pos_d_x);
+
+    is_clear_a := !(is_b_on_a | is_c_on_a | is_d_on_a);
+    is_clear_b := !(is_a_on_b | is_c_on_b | is_d_on_b);
+    is_clear_c := !(is_a_on_c | is_b_on_c | is_d_on_c);
+    is_clear_d := !(is_a_on_d | is_b_on_d | is_c_on_d);
+
+VAR
+    pos_a_x: 0..6; pos_a_y: 0..4;
+    pos_b_x: 0..6; pos_b_y: 0..4;
+    pos_c_x: 0..6; pos_c_y: 0..4;
+    pos_d_x: 0..6; pos_d_y: 0..4;
+
+IVAR
+    action: { none, move_a, move_b, move_c, move_d };
+    target_x: 0..6;
+    target_y: 0..4;
+
+ASSIGN
+    init(pos_c_x) := 0; init(pos_c_y) := 0;
+    init(pos_a_x) := 3; init(pos_a_y) := 0;
+    init(pos_b_x) := 5; init(pos_b_y) := 0;
+    init(pos_d_x) := 3; init(pos_d_y) := 0; 
+
+    next(pos_a_x) := case
+        action = move_a & is_clear_a & (
+            (target_y = 0 & (target_x + size_a <= 7) & 
+                (pos_b_y != 0 | !( !(pos_b_x >= target_x + size_a | pos_b_x + size_b <= target_x) )) &
+                (pos_c_y != 0 | !( !(pos_c_x >= target_x + size_a | pos_c_x + size_c <= target_x) )) &
+                (pos_d_y != 0 | !( !(pos_d_x >= target_x + size_a | pos_d_x + size_d <= target_x) ))
+            ) |
+            (target_y > 0 & ( 
+                (pos_b_y = target_y - 1 & is_clear_b & size_a <= size_b & target_x >= pos_b_x & target_x + size_a <= pos_b_x + size_b) |
+                (pos_c_y = target_y - 1 & is_clear_c & size_a <= size_c & target_x >= pos_c_x & target_x + size_a <= pos_c_x + size_c) |
+                (pos_d_y = target_y - 1 & is_clear_d & size_a <= size_d & target_x >= pos_d_x & target_x + size_a <= pos_d_x + size_d)
+            ))
+        ) : target_x;
+        TRUE: pos_a_x;
+    esac;
+    next(pos_a_y) := case next(pos_a_x) != pos_a_x : target_y; TRUE: pos_a_y; esac;
+
+    next(pos_b_x) := case
+        action = move_b & is_clear_b & (
+            (target_y = 0 & (target_x + size_b <= 7) &
+                (pos_a_y != 0 | !( !(pos_a_x >= target_x + size_b | pos_a_x + size_a <= target_x) )) &
+                (pos_c_y != 0 | !( !(pos_c_x >= target_x + size_b | pos_c_x + size_c <= target_x) )) &
+                (pos_d_y != 0 | !( !(pos_d_x >= target_x + size_b | pos_d_x + size_d <= target_x) ))
+            ) |
+            (target_y > 0 & (
+                (pos_a_y = target_y - 1 & is_clear_a & size_b <= size_a & target_x >= pos_a_x & target_x + size_b <= pos_a_x + size_a) |
+                (pos_c_y = target_y - 1 & is_clear_c & size_b <= size_c & target_x >= pos_c_x & target_x + size_b <= pos_c_x + size_c) |
+                (pos_d_y = target_y - 1 & is_clear_d & size_b <= size_d & target_x >= pos_d_x & target_x + size_b <= pos_d_x + size_d)
+            ))
+        ) : target_x;
+        TRUE: pos_b_x;
+    esac;
+    next(pos_b_y) := case next(pos_b_x) != pos_b_x : target_y; TRUE: pos_b_y; esac;
+
+    next(pos_c_x) := case
+        action = move_c & is_clear_c & (
+            (target_y = 0 & (target_x + size_c <= 7) &
+                (pos_a_y != 0 | !( !(pos_a_x >= target_x + size_c | pos_a_x + size_a <= target_x) )) &
+                (pos_b_y != 0 | !( !(pos_b_x >= target_x + size_c | pos_b_x + size_b <= target_x) )) &
+                (pos_d_y != 0 | !( !(pos_d_x >= target_x + size_c | pos_d_x + size_d <= target_x) ))
+            ) |
+            (target_y > 0 & (
+                (pos_a_y = target_y - 1 & is_clear_a & size_c <= size_a & target_x >= pos_a_x & target_x + size_c <= pos_a_x + size_a) |
+                (pos_b_y = target_y - 1 & is_clear_b & size_c <= size_b & target_x >= pos_b_x & target_x + size_c <= pos_b_x + size_b) |
+                (pos_d_y = target_y - 1 & is_clear_d & size_c <= size_d & target_x >= pos_d_x & target_x + size_c <= pos_d_x + size_d)
+            ))
+        ) : target_x;
+        TRUE: pos_c_x;
+    esac;
+    next(pos_c_y) := case next(pos_c_x) != pos_c_x : target_y; TRUE: pos_c_y; esac;
+
+    next(pos_d_x) := case
+        action = move_d & is_clear_d & (
+            (target_y = 0 & (target_x + size_d <= 7) &
+                (pos_a_y != 0 | !( !(pos_a_x >= target_x + size_d | pos_a_x + size_a <= target_x) )) &
+                (pos_b_y != 0 | !( !(pos_b_x >= target_x + size_d | pos_b_x + size_b <= target_x) )) &
+                (pos_c_y != 0 | !( !(pos_c_x >= target_x + size_d | pos_c_x + size_c <= target_x) ))
+            ) |
+            (target_y > 0 & (
+                (pos_a_y = target_y - 1 & is_clear_a & size_d <= size_a & target_x >= pos_a_x & target_x + size_d <= pos_a_x + size_a) |
+                (pos_b_y = target_y - 1 & is_clear_b & size_d <= size_b & target_x >= pos_b_x & target_x + size_d <= pos_b_x + size_b) |
+                (pos_c_y = target_y - 1 & is_clear_c & size_d <= size_c & target_x >= pos_c_x & target_x + size_d <= pos_c_x + size_c)
+            ))
+        ) : target_x;
+        TRUE: pos_d_x;
+    esac;
+    next(pos_d_y) := case next(pos_d_x) != pos_d_x : target_y; TRUE: pos_d_y; esac;
+
+DEFINE
+    goal := (pos_c_x = 0) & (pos_c_y = 0) &
+            (pos_d_x = 2) & (pos_d_y = 0) &
+            (pos_a_x = 0) & (pos_a_y = 1) &
+            (pos_b_x = 1) & (pos_b_y = 1);
+
+CTLSPEC
+    !EF(goal)
